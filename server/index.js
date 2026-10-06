@@ -1,8 +1,5 @@
 import 'dotenv/config'
 import { timingSafeEqual } from 'node:crypto'
-import { existsSync } from 'node:fs'
-import path from 'node:path'
-import { fileURLToPath } from 'node:url'
 import cors from 'cors'
 import express from 'express'
 import rateLimit from 'express-rate-limit'
@@ -178,17 +175,6 @@ app.post('/api/inquiries/:id/notify', requireAdmin, requireDatabase, async (req,
     return res.status(502).json({ message: 'The email could not be sent. Check the SMTP configuration and try again.' })
   }
 })
-
-const appDirectory = path.dirname(fileURLToPath(import.meta.url))
-const clientBuildDirectory = path.resolve(appDirectory, '../dist')
-
-if (existsSync(clientBuildDirectory)) {
-  app.use(express.static(clientBuildDirectory))
-  app.get('/{*path}', (req, res, next) => {
-    if (req.path.startsWith('/api/')) return next()
-    return res.sendFile(path.join(clientBuildDirectory, 'index.html'))
-  })
-}
 
 app.use((error, _req, res, _next) => {
   console.error('Request failed:', error.message)
